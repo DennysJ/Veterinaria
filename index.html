@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Sistema Veterinario</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            display: flex;
+            max-width: 1200px;
+            width: 100%;
+            gap: 40px;
+            align-items: center;
+        }
+
+        .left-section {
+            flex: 1;
+            color: white;
+            padding: 40px;
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .logo {
+            width: 80px;
+            height: 80px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 20px;
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .logo img {
+            width: 60px;
+            height: 60px;
+            object-fit: contain;
+        }
+
+        .logo-placeholder {
+            font-size: 24px;
+            font-weight: bold;
+            color: white;
+        }
+
+        .brand-name {
+            font-size: 48px;
+            font-weight: 700;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .brand-description {
+            font-size: 22px;
+            font-weight: 300;
+            line-height: 1.4;
+            opacity: 0.9;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+        }
+
+        .right-section {
+            flex: 0 0 400px;
+        }
+
+        .login-card {
+            background: white;
+            border-radius: 16px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+            backdrop-filter: blur(10px);
+        }
+
+        .login-form {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .input-group {
+            position: relative;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 16px 20px;
+            border: 2px solid #e1e5e9;
+            border-radius: 12px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            background: #f8f9fa;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #1877f2;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(24, 119, 242, 0.1);
+        }
+
+        .form-input::placeholder {
+            color: #8a8d91;
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, #1877f2, #42a5f5);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 8px;
+        }
+
+        .login-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(24, 119, 242, 0.3);
+        }
+
+        .login-btn:active {
+            transform: translateY(0);
+        }
+
+        .forgot-password {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .forgot-password a {
+            color: #1877f2;
+            text-decoration: none;
+            font-size: 14px;
+            transition: color 0.3s ease;
+        }
+
+        .forgot-password a:hover {
+            color: #166fe5;
+        }
+
+        .divider {
+            margin: 24px 0;
+            text-align: center;
+            position: relative;
+        }
+
+        .divider::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: #dadde1;
+        }
+
+        .divider span {
+            background: white;
+            color: #8a8d91;
+            padding: 0 16px;
+            font-size: 14px;
+        }
+
+        .create-account {
+            text-align: center;
+        }
+
+        .create-btn {
+            display: inline-block;
+            padding: 12px 24px;
+            background: #42b883;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .create-btn:hover {
+            background: #369970;
+            transform: translateY(-1px);
+        }
+
+        .footer-text {
+            text-align: center;
+            margin-top: 32px;
+            color: #8a8d91;
+            font-size: 13px;
+            line-height: 1.4;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+                gap: 20px;
+            }
+
+            .left-section {
+                text-align: center;
+                padding: 20px;
+            }
+
+            .brand-name {
+                font-size: 36px;
+            }
+
+            .brand-description {
+                font-size: 18px;
+            }
+
+            .right-section {
+                flex: none;
+                width: 100%;
+                max-width: 400px;
+            }
+
+            .login-card {
+                padding: 30px 20px;
+            }
+        }
+
+        .error-message {
+            background: #fee;
+            color: #c33;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            text-align: center;
+            font-size: 14px;
+            border: 1px solid #fcc;
+        }
+
+        .success-message {
+            background: #efe;
+            color: #363;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            text-align: center;
+            font-size: 14px;
+            border: 1px solid #cfc;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="left-section">
+            <div class="logo-container">
+                <div class="logo">
+                    <!-- Aquí puedes poner tu imagen de logo -->
+                    <img src="logo.jpg" height="50" width="30" alt="Logo">
+                    
+                </div>
+            </div>
+            <h1 class="brand-name">MoritosPet</h1>
+            <p class="brand-description">
+                Porque ellos también merecen lo mejor.
+            </p>
+        </div>
+
+        <div class="right-section">
+            <div class="login-card">
+                <form class="login-form" method="POST" action="conexion.php">
+                    <!-- Aquí irían los mensajes de error/éxito de PHP -->
+                    
+                    <div class="input-group">
+                        <input 
+                            type="text" 
+                            name="txtusuario" 
+                            class="form-input" 
+                            placeholder="Usuario" 
+                            required
+                        >
+                    </div>
+
+                    <div class="input-group">
+                        <input 
+                            type="password" 
+                            name="txtcontrasena" 
+                            class="form-input" 
+                            placeholder="Contraseña" 
+                            required
+                        >
+                    </div>
+
+                    <button type="submit" class="login-btn">
+                        Iniciar sesión
+                    </button>
+                </form>
+
+
+                <div class="divider">
+                    <span>o</span>
+                </div>
+
+              
+                </div>
+
+                <div class="footer-text">
+                    
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Animación suave para los inputs
+        document.querySelectorAll('.form-input').forEach(input => {
+            input.addEventListener('focus', function() {
+                this.parentElement.style.transform = 'scale(1.02)';
+            });
+            
+            input.addEventListener('blur', function() {
+                this.parentElement.style.transform = 'scale(1)';
+            });
+        });
+
+        // Efecto de loading en el botón
+        document.querySelector('.login-btn').addEventListener('click', function() {
+            const btn = this;
+            const originalText = btn.textContent;
+            
+            btn.textContent = 'Iniciando sesión...';
+            btn.style.opacity = '0.8';
+            
+            // Restaurar después de un momento (esto sería manejado por el servidor en producción)
+            setTimeout(() => {
+                btn.textContent = originalText;
+                btn.style.opacity = '1';
+            }, 2000);
+        });
+    </script>
+</body>
+</html>

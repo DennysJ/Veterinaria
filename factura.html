@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Generar Factura</title>
+</head>
+<body>
+    <h2>Registro de Factura</h2>
+    <form action="generar_factura.php" method="post">
+        <label>ID Consulta:</label><br>
+        <input type="number" name="id_consulta" required><br><br>
+
+        <label>ID Dueño:</label><br>
+        <input type="number" name="id_dueno" required><br><br>
+
+        <label>ID Mascota:</label><br>
+        <input type="number" name="id_mascota" required><br><br>
+
+        <label>Total:</label><br>
+        <input type="number" step="0.01" name="total" required><br><br>
+
+        <label>Método de pago:</label><br>
+        <input type="text" name="metodo_pago" required><br><br>
+
+        <input type="submit" value="Generar Factura">
+    </form>
+</body>
+</html>
