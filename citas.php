@@ -1,13 +1,5 @@
 <?php
-$usuario = "root";
-$clave = "";
-$bd = "vete";
-$mysqli = new mysqli("localhost", $usuario, $clave, $bd);
-
-// Verifica conexión
-if ($mysqli->connect_error) {
-    die("Error de conexión: " . $mysqli->connect_error);
-}
+require_once 'database.php';
 
 // Recolectar datos del formulario
 $fecha = $_POST['fecha'];
@@ -17,16 +9,17 @@ $mascota = $_POST['mascota'];
 $veterinario = $_POST['veterinario'];
 
 // Preparar y ejecutar la consulta
-$sql = "INSERT INTO citas (fecha, hora, motivo, mascota, veterinario) VALUES (?, ?, ?, ?, ?)";
-$stmt = $mysqli->prepare($sql);
-$stmt->bind_param("sssss", $fecha, $hora, $motivo, $mascota, $veterinario);
+$sql = "INSERT INTO citas (fecha, hora, motivo, id_mascota, id_usuario) VALUES (?, ?, ?, ?, ?)";
+$stmt = $pdo->prepare($sql);
 
-if ($stmt->execute()) {
-    echo "✅ Cita agendada correctamente.";
-} else {
-    echo "❌ Error al agendar la cita: " . $stmt->error;
+try {
+    if ($stmt->execute([$fecha, $hora, $motivo, $mascota, $veterinario])) {
+        echo "✅ Cita agendada correctamente.";
+    } else {
+        echo "❌ Error al agendar la cita.";
+    }
+} catch (PDOException $e) {
+    echo "❌ Error de base de datos: " . $e->getMessage();
 }
 
-$stmt->close();
-$mysqli->close();
 ?>

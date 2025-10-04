@@ -1,31 +1,44 @@
 <?php
-$mysqli = new mysqli("localhost", "root", "", "vete");
-if ($mysqli->connect_error) {
-    die("Error de conexión: " . $mysqli->connect_error);
-}
+require_once 'database.php';
+
 $id = intval($_GET["id"] ?? 0);
 $mensaje = "";
 $tipo_mensaje = "";
 
+if ($id <= 0) {
+    die("ID de usuario no válido.");
+}
+
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $nombre = $mysqli->real_escape_string($_POST["nombre"]);
-    $usuario = $mysqli->real_escape_string($_POST["usuario"]);
-    $rol = $mysqli->real_escape_string($_POST["rol"]);
-    $sql = "UPDATE usuarios SET nombre='$nombre', usuario='$usuario', rol='$rol' WHERE id_usuario = $id";
-    if ($mysqli->query($sql)) {
-        $mensaje = "Usuario actualizado correctamente";
-        $tipo_mensaje = "success";
-    } else {
-        $mensaje = "Error al actualizar: " . $mysqli->error;
+    $nombre = $_POST["nombre"];
+    $usuario = $_POST["usuario"];
+    $rol = $_POST["rol"];
+
+    try {
+        $stmt = $pdo->prepare("UPDATE usuarios SET nombre = ?, usuario = ?, rol = ? WHERE id_usuario = ?");
+        if ($stmt->execute([$nombre, $usuario, $rol, $id])) {
+            $mensaje = "Usuario actualizado correctamente";
+            $tipo_mensaje = "success";
+        } else {
+            $mensaje = "Error al actualizar el usuario.";
+            $tipo_mensaje = "error";
+        }
+    } catch (PDOException $e) {
+        $mensaje = "Error de base de datos: " . $e->getMessage();
         $tipo_mensaje = "error";
     }
 }
 
-// Obtener datos actuales
-$resultado = $mysqli->query("SELECT * FROM usuarios WHERE id_usuario = $id");
-$usuarioDatos = $resultado->fetch_assoc();
-if (!$usuarioDatos) {
-    die("Usuario no encontrado");
+// Obtener datos actuales del usuario
+try {
+    $stmt = $pdo->prepare("SELECT * FROM usuarios WHERE id_usuario = ?");
+    $stmt->execute([$id]);
+    $usuarioDatos = $stmt->fetch(PDO::FETCH_ASSOC);
+    if (!$usuarioDatos) {
+        die("Usuario no encontrado");
+    }
+} catch (PDOException $e) {
+    die("Error al obtener los datos del usuario: " . $e->getMessage());
 }
 
 // Función para obtener el nombre del rol

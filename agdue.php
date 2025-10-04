@@ -1,9 +1,40 @@
+<?php
+$message = null;
+$message_type = '';
+
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["txtnombre"])) {
+    require_once 'database.php';
+
+    $nombre = $_POST["txtnombre"];
+    $telefono = $_POST["txttelefono"];
+    $direccion = $_POST["txtdireccion"];
+
+    if (!empty($nombre) && !empty($telefono) && !empty($direccion)) {
+        try {
+            $stmt = $pdo->prepare("INSERT INTO duenos (nombre, telefono, direccion) VALUES (?, ?, ?)");
+            if ($stmt->execute([$nombre, $telefono, $direccion])) {
+                $message = '¡El dueño <strong>' . htmlspecialchars($nombre) . '</strong> ha sido registrado exitosamente!';
+                $message_type = 'success';
+            } else {
+                throw new Exception("Error al registrar al dueño.");
+            }
+        } catch (Exception $e) {
+            $message = "Error en la base de datos: " . $e->getMessage();
+            $message_type = 'error';
+        }
+    } else {
+        $message = "Por favor, completa todos los campos.";
+        $message_type = 'warning';
+    }
+}
+?>
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Registro de Dueños - Veterinaria</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         * {
             margin: 0;
@@ -12,8 +43,8 @@
         }
 
         body {
-            font-family: 'Arial', sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #f0f4f8, #d9e2ec);
             min-height: 100vh;
             display: flex;
             align-items: center;
@@ -22,30 +53,28 @@
         }
 
         .container {
-            background: rgba(255, 255, 255, 0.95);
+            background: white;
             padding: 40px;
             border-radius: 20px;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-            backdrop-filter: blur(10px);
-            max-width: 500px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.1);
+            max-width: 550px;
             width: 100%;
             text-align: center;
         }
 
         .header {
-            color: #333;
             margin-bottom: 30px;
+        }
+
+        .header .icon {
+            font-size: 4rem;
+            color: #4A90E2;
+            margin-bottom: 15px;
         }
 
         .header h1 {
             font-size: 2.5em;
-            margin-bottom: 10px;
-            color: #5a67d8;
-        }
-
-        .header p {
-            color: #666;
-            font-size: 1.1em;
+            color: #333;
         }
 
         .form-group {
@@ -56,30 +85,35 @@
         .form-group label {
             display: block;
             margin-bottom: 8px;
-            color: #333;
+            color: #555;
             font-weight: 600;
-            font-size: 1.1em;
+            font-size: 1em;
         }
 
         .form-group input {
             width: 100%;
             padding: 15px;
-            border: 2px solid #e2e8f0;
+            border: 2px solid #ddd;
             border-radius: 10px;
             font-size: 1em;
             transition: all 0.3s ease;
-            background: #f8fafc;
         }
 
         .form-group input:focus {
             outline: none;
-            border-color: #5a67d8;
-            box-shadow: 0 0 0 3px rgba(90, 103, 216, 0.1);
-            background: white;
+            border-color: #4A90E2;
+            box-shadow: 0 0 8px rgba(74, 144, 226, 0.2);
+        }
+
+        .btn-group {
+            margin-top: 30px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
         }
 
         .btn {
-            padding: 15px 30px;
+            padding: 15px;
             border: none;
             border-radius: 10px;
             font-size: 1.1em;
@@ -87,168 +121,107 @@
             cursor: pointer;
             transition: all 0.3s ease;
             text-decoration: none;
-            display: inline-block;
-            margin: 10px;
-            min-width: 140px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
         }
 
         .btn-primary {
-            background: linear-gradient(135deg, #5a67d8, #667eea);
+            background: linear-gradient(135deg, #4A90E2, #357ABD);
             color: white;
         }
 
         .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(90, 103, 216, 0.3);
+            box-shadow: 0 8px 20px rgba(74, 144, 226, 0.3);
         }
 
         .btn-secondary {
-            background: linear-gradient(135deg, #718096, #4a5568);
+            background: #6c757d;
             color: white;
         }
-
+        
         .btn-secondary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(113, 128, 150, 0.3);
+             box-shadow: 0 8px 20px rgba(108, 117, 125, 0.3);
         }
 
-        .btn-success {
-            background: linear-gradient(135deg, #48bb78, #38a169);
-            color: white;
-        }
-
-        .btn-success:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(72, 187, 120, 0.3);
-        }
-
-        .success-message {
-            background: linear-gradient(135deg, #48bb78, #38a169);
-            color: white;
-            padding: 30px;
-            border-radius: 15px;
+        .message {
+            padding: 20px;
+            border-radius: 10px;
             margin-bottom: 30px;
-            font-size: 1.3em;
-            font-weight: 600;
+            font-size: 1.1em;
+            font-weight: 500;
         }
 
-        .success-message h2 {
-            font-size: 2em;
-            margin-bottom: 15px;
+        .message.success {
+            background: #d4edda;
+            color: #155724;
         }
 
-        .icon {
-            font-size: 3em;
-            margin-bottom: 20px;
+        .message.error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
+        .message.warning {
+            background: #fff3cd;
+            color: #856404;
         }
 
-        @media (max-width: 600px) {
-            .container {
-                padding: 25px;
-                margin: 10px;
-            }
-            
-            .header h1 {
-                font-size: 2em;
-            }
-            
-            .btn {
-                width: 100%;
-                margin: 5px 0;
-            }
-        }
     </style>
 </head>
 <body>
     <div class="container">
-        <?php
-        // Verificar si se enviaron datos del formulario
-        if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["txtnombre"])) {
-            $nombre = $_POST["txtnombre"];
-            $telefono = $_POST["txttelefono"];
-            $direccion = $_POST["txtdireccion"];
-            
-            // Validación básica
-            if (!empty($nombre) && !empty($telefono) && !empty($direccion)) {
-                try {
-                    $mysqli = new mysqli("localhost", "root", "", "vete");
-                    
-                    // Verificar conexión
-                    if ($mysqli->connect_error) {
-                        throw new Exception("Error de conexión: " . $mysqli->connect_error);
-                    }
-                    
-                    // Preparar la consulta para evitar inyección SQL
-                    $stmt = $mysqli->prepare("INSERT INTO duenos (nombre, telefono, direccion) VALUES (?, ?, ?)");
-                    $stmt->bind_param("sss", $nombre, $telefono, $direccion);
-                    
-                    if ($stmt->execute()) {
-                        echo '<div class="success-message">';
-                        echo '<div class="icon">✅</div>';
-                        echo '<h2>¡Éxito!</h2>';
-                        echo '<p>El dueño <strong>' . htmlspecialchars($nombre) . '</strong> ha sido registrado exitosamente.</p>';
-                        echo '</div>';
-                        echo '<a href="' . $_SERVER['PHP_SELF'] . '" class="btn btn-success">Agregar Otro Dueño</a>';
-                        echo '<a href="consulta.php" class="btn btn-secondary">Regresar al Menú</a>';
-                    } else {
-                        throw new Exception("Error al insertar datos");
-                    }
-                    
-                    $stmt->close();
-                    $mysqli->close();
-                    
-                } catch (Exception $e) {
-                    echo '<div style="background: #f56565; color: white; padding: 20px; border-radius: 10px; margin-bottom: 20px;">';
-                    echo '<h3>Error</h3>';
-                    echo '<p>' . $e->getMessage() . '</p>';
-                    echo '</div>';
-                    echo '<a href="' . $_SERVER['PHP_SELF'] . '" class="btn btn-primary">Intentar de Nuevo</a>';
-                }
-            } else {
-                echo '<div style="background: #f6ad55; color: white; padding: 20px; border-radius: 10px; margin-bottom: 20px;">';
-                echo '<h3>Advertencia</h3>';
-                echo '<p>Por favor, completa todos los campos.</p>';
-                echo '</div>';
-                echo '<a href="' . $_SERVER['PHP_SELF'] . '" class="btn btn-primary">Volver al Formulario</a>';
-            }
-        } else {
-            // Mostrar formulario
-        ?>
-            <div class="header">
-                <div class="icon">🐕</div>
-                <h1>Registro de Dueños</h1>
-                <p>Sistema de Gestión Veterinaria</p>
+        <div class="header">
+            <div class="icon"><i class="fas fa-user-plus"></i></div>
+            <h1>Registro de Dueños</h1>
+        </div>
+
+        <?php if ($message && $message_type === 'success'): ?>
+            <div class="message success"><?php echo $message; ?></div>
+            <div class="btn-group">
+                <a href="<?php echo $_SERVER['PHP_SELF']; ?>" class="btn btn-primary"><i class="fas fa-plus"></i> Agregar Otro Dueño</a>
+                <a href="consulta.php" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> Regresar al Menú</a>
             </div>
-            
-            <form method="POST" action="<?php echo $_SERVER['PHP_SELF']; ?>">
+        <?php elseif ($message): ?>
+            <div class="message <?php echo $message_type; ?>"><?php echo $message; ?></div>
+            <form method="POST" action="<?php echo htmlspecialchars($_SERVER['PHP_SELF']); ?>">
                 <div class="form-group">
-                    <label for="txtnombre">👤 Nombre Completo:</label>
-                    <input type="text" id="txtnombre" name="txtnombre" required 
-                           placeholder="Ingresa el nombre completo del dueño">
+                    <label for="txtnombre"><i class="fas fa-user"></i> Nombre Completo:</label>
+                    <input type="text" id="txtnombre" name="txtnombre" required value="<?php echo htmlspecialchars($_POST['txtnombre'] ?? ''); ?>">
                 </div>
-                
                 <div class="form-group">
-                    <label for="txttelefono">📞 Teléfono:</label>
-                    <input type="tel" id="txttelefono" name="txttelefono" required 
-                           placeholder="Ej: +52 55 1234 5678">
+                    <label for="txttelefono"><i class="fas fa-phone"></i> Teléfono:</label>
+                    <input type="tel" id="txttelefono" name="txttelefono" required value="<?php echo htmlspecialchars($_POST['txttelefono'] ?? ''); ?>">
                 </div>
-                
                 <div class="form-group">
-                    <label for="txtdireccion">🏠 Dirección:</label>
-                    <input type="text" id="txtdireccion" name="txtdireccion" required 
-                           placeholder="Dirección completa">
+                    <label for="txtdireccion"><i class="fas fa-map-marker-alt"></i> Dirección:</label>
+                    <input type="text" id="txtdireccion" name="txtdireccion" required value="<?php echo htmlspecialchars($_POST['txtdireccion'] ?? ''); ?>">
                 </div>
-                
-                <div style="margin-top: 30px;">
-                    <button type="submit" class="btn btn-primary">
-                        ➕ Registrar Dueño
-                    </button>
-                    <a href="consulta.php" class="btn btn-secondary">
-                        🔙 Regresar al Menú
-                    </a>
+                <div class="btn-group">
+                    <button type="submit" class="btn btn-primary"><i class="fas fa-check"></i> Registrar Dueño</button>
                 </div>
             </form>
-        <?php } ?>
+        <?php else: ?>
+            <form method="POST" action="<?php echo htmlspecialchars($_SERVER['PHP_SELF']); ?>">
+                <div class="form-group">
+                    <label for="txtnombre"><i class="fas fa-user"></i> Nombre Completo:</label>
+                    <input type="text" id="txtnombre" name="txtnombre" required placeholder="Ingresa el nombre completo">
+                </div>
+                <div class="form-group">
+                    <label for="txttelefono"><i class="fas fa-phone"></i> Teléfono:</label>
+                    <input type="tel" id="txttelefono" name="txttelefono" required placeholder="Ej: 55 1234 5678">
+                </div>
+                <div class="form-group">
+                    <label for="txtdireccion"><i class="fas fa-map-marker-alt"></i> Dirección:</label>
+                    <input type="text" id="txtdireccion" name="txtdireccion" required placeholder="Dirección completa">
+                </div>
+                <div class="btn-group">
+                    <button type="submit" class="btn btn-primary"><i class="fas fa-check"></i> Registrar Dueño</button>
+                    <a href="consulta.php" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> Regresar al Menú</a>
+                </div>
+            </form>
+        <?php endif; ?>
     </div>
 </body>
 </html>

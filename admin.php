@@ -1,19 +1,13 @@
 <?php
-$mysqli = new mysqli("localhost", "root", "", "vete");
-if ($mysqli->connect_error) {
-    die("Error de conexión: " . $mysqli->connect_error);
-}
+require_once 'database.php';
+
 if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['eliminar_id'])) {
     $id_eliminar = intval($_POST['eliminar_id']);
-    $stmt = $mysqli->prepare("DELETE FROM usuarios WHERE id_usuario = ?");
-    $stmt->bind_param("i", $id_eliminar);
-    $stmt->execute();
-    $stmt->close();
-    // Redirige para evitar reenviar el formulario al refrescar
+    $stmt = $pdo->prepare("DELETE FROM usuarios WHERE id_usuario = ?");
+    $stmt->execute([$id_eliminar]);
     header("Location: " . $_SERVER['PHP_SELF']);
     exit();
 }
-
 
 $sql = "SELECT id_usuario, rol, nombre, usuario,
         CASE rol
@@ -22,10 +16,11 @@ $sql = "SELECT id_usuario, rol, nombre, usuario,
             WHEN '3' THEN 'Veterinario'
         END AS rol_nombre
         FROM usuarios";
-$resultado = $mysqli->query($sql);
-if (!$resultado) {
-    die("Error en la consulta: " . $mysqli->error);
+$stmt = $pdo->query($sql);
+if (!$stmt) {
+    die("Error en la consulta");
 }
+$usuarios = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -327,21 +322,10 @@ if (!$resultado) {
 
         <div class="content">
             <?php
-            $total_usuarios = $resultado->num_rows;
-            $administradores = 0;
-            $recepcionistas = 0;
-            $veterinarios = 0;
-            
-            // Resetear el puntero del resultado para contar roles
-            $resultado->data_seek(0);
-            while($fila = $resultado->fetch_assoc()) {
-                switch($fila['rol']) {
-                    case '1': $administradores++; break;
-                    case '2': $recepcionistas++; break;
-                    case '3': $veterinarios++; break;
-                }
-            }
-            $resultado->data_seek(0); // Resetear para mostrar la tabla
+            $total_usuarios = count($usuarios);
+            $administradores = count(array_filter($usuarios, function($u) { return $u['rol'] == '1'; }));
+            $recepcionistas = count(array_filter($usuarios, function($u) { return $u['rol'] == '2'; }));
+            $veterinarios = count(array_filter($usuarios, function($u) { return $u['rol'] == '3'; }));
             ?>
 
             <div class="stats-bar">
@@ -376,7 +360,7 @@ if (!$resultado) {
                         </tr>
                     </thead>
                     <tbody>
-                        <?php while($fila = $resultado->fetch_assoc()): ?>
+                        <?php foreach($usuarios as $fila): ?>
                             <tr>
                                 <td><strong><?php echo $fila['id_usuario']; ?></strong></td>
                                 <td>
@@ -411,7 +395,7 @@ if (!$resultado) {
 
                                 </td>
                             </tr>
-                        <?php endwhile; ?>
+                        <?php endforeach; ?>
                     </tbody>
                 </table>
                 <?php else: ?>
@@ -423,7 +407,7 @@ if (!$resultado) {
                 <?php endif; ?>
             </div>
 
-            <a href="adminpant alla.html" class="btn-back">
+            <a href="adminpantalla.html" class="btn-back">
                 <i class="fas fa-arrow-left"></i> Volver al Menú Principal
             </a>
              <a href="agregar.php" class="btn-back">
@@ -433,6 +417,3 @@ if (!$resultado) {
     </div>
 </body>
 </html>
-<?php
-$mysqli->close();
-?>

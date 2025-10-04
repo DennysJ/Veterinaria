@@ -1,28 +1,29 @@
 <?php
-// Conexión a la base de datos
-$mysqli = new mysqli("localhost", "root", "", "vete");
-// Verificar conexión
-if ($mysqli->connect_error) {
-    die("Error de conexión: " . $mysqli->connect_error);
-}
-// Variable para mostrar mensaje
+require_once 'database.php';
+
 $mensaje = "";
 $tipo_mensaje = "";
-// Si se envió el formulario
+
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $nombre = $mysqli->real_escape_string($_POST["nombre"]);
-    $usuario = $mysqli->real_escape_string($_POST["usuario"]);
-    $contrasena = password_hash($_POST["contrasena"], PASSWORD_DEFAULT);
+    $nombre = $_POST["nombre"];
+    $usuario = $_POST["usuario"];
+    $contrasena = $_POST["contrasena"];
     $rol = $_POST["rol"];
-    // Verificamos que no esté vacío ningún campo
-    if ($nombre && $usuario && $_POST["contrasena"] && $rol) {
-        $sql = "INSERT INTO usuarios (nombre, usuario, contrasena, rol)
-                VALUES ('$nombre', '$usuario', '$contrasena', '$rol')";
-        if ($mysqli->query($sql)) {
-            $mensaje = "Usuario registrado correctamente";
-            $tipo_mensaje = "success";
-        } else {
-            $mensaje = "Error al registrar usuario: " . $mysqli->error;
+
+    if ($nombre && $usuario && $contrasena && $rol) {
+        $contrasena_hash = password_hash($contrasena, PASSWORD_DEFAULT);
+
+        try {
+            $stmt = $pdo->prepare("INSERT INTO usuarios (nombre, usuario, contrasena, rol) VALUES (?, ?, ?, ?)");
+            if ($stmt->execute([$nombre, $usuario, $contrasena_hash, $rol])) {
+                $mensaje = "Usuario registrado correctamente";
+                $tipo_mensaje = "success";
+            } else {
+                $mensaje = "Error al registrar usuario";
+                $tipo_mensaje = "error";
+            }
+        } catch (PDOException $e) {
+            $mensaje = "Error de base de datos: " . $e->getMessage();
             $tipo_mensaje = "error";
         }
     } else {
