@@ -55,7 +55,7 @@ if (isset($_GET['id'])) {
 
 <?php if (isset($row)) { ?>
     <h2>Editar Mascota</h2>
-    <form action="editmascota.php" method="POST">
+    <form action="editarmasc.php" method="POST">
         <input type="hidden" name="id" value="<?php echo $id; ?>">
 
         <label>Foto:</label>

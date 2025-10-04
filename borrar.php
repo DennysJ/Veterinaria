@@ -273,7 +273,7 @@ $sql = "SELECT id_mascota, foto, nombre FROM mascotas";
                                 <?php echo htmlspecialchars($pet['nombre']); ?>
                             </div>
                             <div class="pet-actions">
-    <a href="editarmascota.php?id=<?php echo $pet['id_mascota']; ?>" 
+    <a href="editarmasc.php?id=<?php echo $pet['id_mascota']; ?>" 
        class="edit-btn">
        <i class="fas fa-edit"></i>
        Editar

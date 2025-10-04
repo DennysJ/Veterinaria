@@ -1,141 +1,371 @@
 <?php
-require('fpdf.php');
-
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    // Recoger datos del formulario
+    require('fpdf/fpdf.php');
+
+    // Conexión a base de datos
+    $mysqli = new mysqli("localhost", "root", "", "vete");
+    if ($mysqli->connect_error) {
+        die("Error de conexión: " . $mysqli->connect_error);
+    }
+
+    // Recibir datos
     $mascota = $_POST['txtmascota'];
     $fecha = $_POST['txtfecha'];
     $diagnostico = $_POST['txtdiagnostico'];
     $tratamiento = $_POST['txttratamiento'];
-    $medicamento = $_POST['txtmedicamento'];
-    $observaciones = $_POST['txtobservaciones'];
+    $medicamentos = $_POST['txtmedicamento'];
     $costo = $_POST['txtcosto'];
-    
-    // Datos adicionales que podrías agregar al formulario
-    $veterinario = isset($_POST['txtveterinario']) ? $_POST['txtveterinario'] : 'Dr. [Nombre del Veterinario]';
-    $cedula = isset($_POST['txtcedula']) ? $_POST['txtcedula'] : '12345678';
-    $clinica = isset($_POST['txtclinica']) ? $_POST['txtclinica'] : 'Hospital Veterinario MoritosPet';
-    $direccion = isset($_POST['txtdireccion']) ? $_POST['txtdireccion'] : 'UMB. Huixquilican';
-    $telefono = isset($_POST['txttelefono']) ? $_POST['txttelefono'] : '(555) 123-4567';
-    $propietario = isset($_POST['txtpropietario']) ? $_POST['txtpropietario'] : 'Propietario';
-    
-    // Conexión a la base de datos
-    $conn = new mysqli("localhost", "root", "", "vete");
-    if ($conn->connect_error) {
-        die("Error en conexión: " . $conn->connect_error);
-    }
-    
-    $stmt = $conn->prepare("INSERT INTO recetas (mascota, diagnostico, tratamiento, medicamentos, observaciones, fecha, costo_consulta) VALUES (?, ?, ?, ?, ?, ?, ?)");
-    $stmt->bind_param("sssssss", $mascota, $diagnostico, $tratamiento, $medicamento, $observaciones, $fecha, $costo);
+    $observaciones = $_POST['txtobservaciones'];
+
+    // Guardar en la base de datos (asumiendo que tienes una tabla 'recetas' con campos que coinciden)
+    $stmt = $mysqli->prepare("INSERT INTO recetas (mascota, fecha, diagnostico, tratamiento, medicamentos, costo, observaciones) VALUES (?, ?, ?, ?, ?, ?, ?)");
+    $stmt->bind_param("sssssds", $mascota, $fecha, $diagnostico, $tratamiento, $medicamentos, $costo, $observaciones);
     $stmt->execute();
     $stmt->close();
-    $conn->close();
-    
-    // Crear PDF con diseño de receta médica
+
+    // Crear PDF
     $pdf = new FPDF();
     $pdf->AddPage();
-    $pdf->SetMargins(20, 15, 20);
-    
-    // ENCABEZADO DE LA CLÍNICA
-    $pdf->SetFont('Arial', 'B', 18);
-    $pdf->SetTextColor(0, 100, 150); // Azul profesional
-    $pdf->Cell(0, 12, utf8_decode($clinica), 0, 1, 'C');
-    
-    $pdf->SetFont('Arial', '', 10);
-    $pdf->SetTextColor(80, 80, 80);
-    $pdf->Cell(0, 5, utf8_decode($direccion), 0, 1, 'C');
-    $pdf->Cell(0, 5, 'Tel: ' . $telefono, 0, 1, 'C');
-    
-    // Línea separadora
-    $pdf->Ln(5);
-    $pdf->SetDrawColor(0, 100, 150);
-    $pdf->Line(20, $pdf->GetY(), 190, $pdf->GetY());
-    $pdf->Ln(8);
-    
-    // TÍTULO DE RECETA
     $pdf->SetFont('Arial', 'B', 16);
-    $pdf->SetTextColor(0, 0, 0);
-    $pdf->Cell(0, 10, 'RECETA MEDICA VETERINARIA', 0, 1, 'C');
-    $pdf->Ln(5);
-    
-    
-    
-    $pdf->Ln(3);
-    
-    // INFORMACIÓN DEL PACIENTE Y PROPIETARIO
-    $pdf->SetFillColor(240, 240, 240);
-    $pdf->SetFont('Arial', 'B', 11);
-    $pdf->Cell(0, 8, 'INFORMACION DEL PACIENTE', 1, 1, 'C', true);
-    
-    $pdf->SetFont('Arial', 'B', 10);
-    $pdf->Cell(30, 8, 'MASCOTA:', 1, 0);
-    $pdf->SetFont('Arial', '', 10);
-    $pdf->Cell(70, 8, utf8_decode($mascota), 1, 0);
-    $pdf->SetFont('Arial', 'B', 10);
-    $pdf->Cell(30, 8, 'FECHA:', 1, 0);
-    $pdf->SetFont('Arial', '', 10);
-    $pdf->Cell(40, 8, $fecha, 1, 1);
-    
-    $pdf->SetFont('Arial', 'B', 10);
-    $pdf->Cell(30, 8, 'PROPIETARIO:', 1, 0);
-    $pdf->SetFont('Arial', '', 10);
-    $pdf->Cell(140, 8, utf8_decode($propietario), 1, 1);
-    
-    $pdf->Ln(5);
-    
-    // DIAGNÓSTICO
-    $pdf->SetFont('Arial', 'B', 11);
-    $pdf->Cell(0, 8, 'DIAGNOSTICO', 1, 1, 'C', true);
-    $pdf->SetFont('Arial', '', 10);
-    $pdf->MultiCell(0, 6, utf8_decode($diagnostico), 1);
-    
-    $pdf->Ln(3);
-    
-    // TRATAMIENTO
-    $pdf->SetFont('Arial', 'B', 11);
-    $pdf->Cell(0, 8, 'TRATAMIENTO PRESCRITO', 1, 1, 'C', true);
-    $pdf->SetFont('Arial', '', 10);
-    $pdf->MultiCell(0, 6, utf8_decode($tratamiento), 1);
-    
-    $pdf->Ln(3);
-    
-    // MEDICAMENTOS
-    $pdf->SetFont('Arial', 'B', 11);
-    $pdf->Cell(0, 8, 'MEDICAMENTOS', 1, 1, 'C', true);
-    $pdf->SetFont('Arial', '', 10);
-    $pdf->MultiCell(0, 6, utf8_decode($medicamento), 1);
-    
-    $pdf->Ln(3);
-    
-    // OBSERVACIONES
-    $pdf->SetFont('Arial', 'B', 11);
-    $pdf->Cell(0, 8, 'OBSERVACIONES E INDICACIONES', 1, 1, 'C', true);
-    $pdf->SetFont('Arial', '', 10);
-    $pdf->MultiCell(0, 6, utf8_decode($observaciones), 1);
-    
-    $pdf->Ln(5);
-    
-    // COSTO
-    $pdf->SetFont('Arial', 'B', 12);
-    $pdf->SetTextColor(0, 100, 0);
-    $pdf->Cell(0, 8, 'COSTO DE CONSULTA: $' . number_format($costo, 2), 0, 1, 'R');
-    
-    // FIRMA
-    $pdf->Ln(15);
-    $pdf->SetTextColor(0, 0, 0);
-    $pdf->SetFont('Arial', '', 10);
-    $pdf->Cell(0, 5, '________________________________', 0, 1, 'R');
-    $pdf->Cell(0, 5, 'Firma del Veterinario', 0, 1, 'R');
-    
-    
-    // PIE DE PÁGINA
+    $pdf->Cell(0, 10, 'Receta Veterinaria', 0, 1, 'C');
     $pdf->Ln(10);
-    $pdf->SetFont('Arial', 'I', 8);
-    $pdf->SetTextColor(100, 100, 100);
-    $pdf->Cell(0, 5, 'Esta receta medica es valida unicamente con la prescripción del veterinario autorizado', 0, 1, 'C');
-    $pdf->Cell(0, 5, 'Fecha de emisión: ' . date('d/m/Y H:i:s'), 0, 1, 'C');
-    
-    // Generar el PDF
-    $pdf->Output('I', 'receta_medica_' . str_replace(' ', '_', $mascota) . '_' . date('Y-m-d') . '.pdf');
+    $pdf->SetFont('Arial', '', 12);
+    $pdf->Cell(0, 10, "Mascota: $mascota", 0, 1);
+    $pdf->Cell(0, 10, "Fecha: $fecha", 0, 1);
+    $pdf->Ln(10);
+    $pdf->MultiCell(0, 10, "Diagnóstico:\n$diagnostico\n\nTratamiento:\n$tratamiento\n\nMedicamentos:\n$medicamentos\n\nCosto: $$costo\n\nObservaciones:\n$observaciones");
+
+    $pdf->Output('I', 'receta.pdf'); // Mostrar en navegador
+
+    $mysqli->close();
+    exit;
 }
 ?>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crear Receta Médica - Veterinaria</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #4CAF50, #45a049);
+            color: white;
+            text-align: center;
+            padding: 30px 20px;
+            position: relative;
+        }
+
+        .header::before {
+            content: '🐾';
+            font-size: 40px;
+            position: absolute;
+            top: 20px;
+            left: 30px;
+            opacity: 0.7;
+        }
+
+        .header::after {
+            content: '🏥';
+            font-size: 40px;
+            position: absolute;
+            top: 20px;
+            right: 30px;
+            opacity: 0.7;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .form-container {
+            padding: 40px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group.full-width {
+            grid-column: 1 / -1;
+        }
+
+        .form-group label {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+            font-size: 1.1em;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            padding: 12px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            background: #f9f9f9;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #4CAF50;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 100px;
+            font-family: inherit;
+        }
+
+        .icon-input {
+            position: relative;
+        }
+
+        .icon-input::before {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 18px;
+            color: #666;
+            z-index: 1;
+        }
+
+        .pet-input::before { content: '🐕'; }
+        .date-input::before { content: '📅'; }
+        .diagnosis-input::before { content: '🔍'; }
+        .treatment-input::before { content: '💊'; }
+        .medicine-input::before { content: '🏥'; }
+        .observations-input::before { content: '📝'; }
+        .cost-input::before { content: '💰'; }
+
+        .icon-input input {
+            padding-left: 45px;
+        }
+
+        .submit-btn {
+            background: linear-gradient(135deg, #4CAF50, #45a049);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.2em;
+            font-weight: 600;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+            display: block;
+            margin: 30px auto 0;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(76, 175, 80, 0.4);
+        }
+
+        .submit-btn:active {
+            transform: translateY(-1px);
+        }
+
+        .decorative-elements {
+            position: fixed;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .paw-print {
+            font-size: 30px;
+            opacity: 0.1;
+            animation: float 6s ease-in-out infinite;
+        }
+
+        .paw-1 { top: 10%; left: 10%; animation-delay: 0s; }
+        .paw-2 { top: 20%; right: 10%; animation-delay: 2s; }
+        .paw-3 { bottom: 10%; left: 15%; animation-delay: 4s; }
+        .paw-4 { bottom: 20%; right: 20%; animation-delay: 1s; }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+
+        @media (max-width: 768px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            
+            .header h1 {
+                font-size: 2em;
+            }
+            
+            .form-container {
+                padding: 20px;
+            }
+            
+            .header::before,
+            .header::after {
+                font-size: 30px;
+            }
+        }
+
+        .required::after {
+            content: ' *';
+            color: #e74c3c;
+        }
+    </style>
+</head>
+<body>
+    <div class="decorative-elements">
+        <div class="paw-print paw-1">🐾</div>
+        <div class="paw-print paw-2">🐾</div>
+        <div class="paw-print paw-3">🐾</div>
+        <div class="paw-print paw-4">🐾</div>
+    </div>
+
+    <div class="container">
+        <div class="header">
+            <h1>Receta Médica Veterinaria</h1>
+            <p>Sistema de Gestión de Consultas</p>
+        </div>
+
+        <div class="form-container">
+            <form action="recetas.php" method="POST">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="txtmascota" class="required">Nombre de la Mascota</label>
+                        <div class="icon-input pet-input">
+                            <input type="text" name="txtmascota" id="txtmascota" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="txtfecha" class="required">Fecha de Consulta</label>
+                        <div class="icon-input date-input">
+                            <input type="date" name="txtfecha" id="txtfecha" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group full-width">
+                        <label for="txtdiagnostico" class="required">Diagnóstico</label>
+                        <div class="icon-input diagnosis-input">
+                            <input type="text" name="txtdiagnostico" id="txtdiagnostico" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group full-width">
+                        <label for="txttratamiento" class="required">Tratamiento</label>
+                        <div class="icon-input treatment-input">
+                            <input type="text" name="txttratamiento" id="txttratamiento" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="txtmedicamento" class="required">Medicamento</label>
+                        <div class="icon-input medicine-input">
+                            <input type="text" name="txtmedicamento" id="txtmedicamento" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="txtcosto" class="required">Costo de la Consulta</label>
+                        <div class="icon-input cost-input">
+                            <input type="number" name="txtcosto" id="txtcosto" step="0.01" min="0" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group full-width">
+                        <label for="txtobservaciones">Observaciones Adicionales</label>
+                        <textarea name="txtobservaciones" id="txtobservaciones" placeholder="Escriba aquí cualquier observación adicional sobre el tratamiento o cuidados especiales..."></textarea>
+                    </div>
+                </div>
+
+                <button type="submit" class="submit-btn">
+                    💾 Guardar Receta Médica
+               <br>
+            
+                    <p> <a href="veterinario.html" class="submit-btn" style="text-align: center; text-decoration: none;">
+  ⬅️ Regresar al menú
+</a>
+               </p>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Establecer la fecha actual por defecto
+        document.getElementById('txtfecha').valueAsDate = new Date();
+
+        // Validación mejorada del formulario
+        document.querySelector('form').addEventListener('submit', function(e) {
+            const requiredFields = this.querySelectorAll('input[required]');
+            let allValid = true;
+            
+            requiredFields.forEach(field => {
+                if (!field.value.trim()) {
+                    field.style.borderColor = '#e74c3c';
+                    allValid = false;
+                } else {
+                    field.style.borderColor = '#4CAF50';
+                }
+            });
+            
+            if (!allValid) {
+                e.preventDefault();
+                alert('Por favor, complete todos los campos obligatorios marcados con *');
+            }
+        });
+
+        // Efectos visuales mejorados
+        document.querySelectorAll('input, textarea').forEach(field => {
+            field.addEventListener('input', function() {
+                if (this.value.trim()) {
+                    this.style.borderColor = '#4CAF50';
+                }
+            });
+        });
+    </script>
+</body>
+</html>
