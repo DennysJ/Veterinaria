@@ -1,5 +1,5 @@
 # Veterinaria
-#Veterinaria MoritosPet
+# Veterinaria MoritosPet
 
 Aplicación desarrollada para la **gestión integral de una clínica veterinaria**, permitiendo administrar citas, pacientes, dueños, tratamientos y control de historial médico.  
 Este sistema busca optimizar las operaciones diarias de la veterinaria y mejorar la atención al cliente mediante herramientas digitales fáciles de usar.
@@ -24,7 +24,7 @@ Este sistema busca optimizar las operaciones diarias de la veterinaria y mejorar
 
 ---
 
-## 🚀 **Objetivos del proyecto**
+## **Objetivos del proyecto**
 
 - Digitalizar los procesos administrativos de una veterinaria.  
 - Reducir errores en el registro manual de datos.  
