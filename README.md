@@ -1,12 +1,11 @@
 # Veterinaria
-# 🐶 Veterinaria MoritosPet
+#Veterinaria MoritosPet
 
 Aplicación desarrollada para la **gestión integral de una clínica veterinaria**, permitiendo administrar citas, pacientes, dueños, tratamientos y control de historial médico.  
 Este sistema busca optimizar las operaciones diarias de la veterinaria y mejorar la atención al cliente mediante herramientas digitales fáciles de usar.
 
----
 
-## 🩺 **Características principales**
+## **Características principales**
 
 - Registro y gestión de **mascotas y dueños**.  
 - Agenda de **citas médicas y vacunaciones**.  
@@ -15,9 +14,7 @@ Este sistema busca optimizar las operaciones diarias de la veterinaria y mejorar
 - Generación de **reportes y estadísticas**.  
 - Interfaz intuitiva y adaptable (responsive design).
 
----
-
-## 💻 **Tecnologías utilizadas**
+## **Tecnologías utilizadas**
 
 - **Frontend:** HTML5, CSS3, JavaScript / React  
 - **Backend:** Node.js / Express  
