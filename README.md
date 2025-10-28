@@ -34,9 +34,7 @@ Este sistema busca optimizar las operaciones diarias de la veterinaria y mejorar
 - Facilitar el acceso al historial médico de los pacientes.  
 - Ofrecer una experiencia moderna y rápida tanto para el personal como para los clientes.
 
----
-
-## 📸 **Vista previa del sistema**
+## **Vista previa del sistema**
 <div align="center">
   <img src="https://github.com/DennysJ/Veterinaria/blob/main/Veterinaria/moritos.png" alt="Prototipo" width="600">
 </div>
