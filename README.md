@@ -38,5 +38,5 @@ Este sistema busca optimizar las operaciones diarias de la veterinaria y mejorar
 
 ## 📸 **Vista previa del sistema**
 <div align="center">
-  <img src="https://github.com/DennysJ/Veterinaria/blob/main/Img-Kaizen/Icono.jpg" alt="Prototipo" width="200">
+  <img src="https://github.com/DennysJ/Veterinaria/blob/main/Veterinaria/moritos.png" alt="Prototipo" width="200">
 </div>
